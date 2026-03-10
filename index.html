@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>IA Tradutor de Vídeos</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+color:white;
+text-align:center;
+padding:20px;
+}
+
+input{
+width:80%;
+padding:10px;
+margin:10px;
+font-size:16px;
+}
+
+button{
+padding:10px 20px;
+font-size:16px;
+background:#28a745;
+border:none;
+color:white;
+border-radius:6px;
+}
+
+iframe{
+width:90%;
+height:400px;
+margin-top:20px;
+}
+
+#result{
+margin-top:20px;
+background:#222;
+padding:15px;
+border-radius:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🎬 Tradutor de Vídeos com IA</h1>
+
+<input id="videoUrl" placeholder="Cole link do vídeo">
+
+<br>
+
+<button onclick="translateVideo()">Traduzir</button>
+
+<div id="player"></div>
+
+<div id="result"></div>
+
+<script>
+
+async function translateVideo(){
+
+let url=document.getElementById("videoUrl").value
+
+let id=url.split("v=")[1]
+
+document.getElementById("player").innerHTML=
+`<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`
+
+document.getElementById("result").innerHTML="Processando vídeo..."
+
+let r=await fetch("/translate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({url:url})
+})
+
+let data=await r.json()
+
+document.getElementById("result").innerHTML=data.text
+
+}
+
+</script>
+
+</body>
+</html>
