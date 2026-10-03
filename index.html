@@ -1,345 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IPTV Player - iOS Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root {
-            --bg-color: #000000;
-            --card-bg: #1c1c1e;
-            --accent: #0a84ff;
-            --text-main: #ffffff;
-            --text-sub: #8e8e93;
-            --danger: #ff453a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 30px;
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(28, 28, 30, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 15px;
-            border-bottom: 0.5px solid #38383a;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .container {
-            padding: 15px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Player Container */
-        .player-wrapper {
-            position: sticky;
-            top: 60px;
-            z-index: 90;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        }
-
-        video {
-            width: 100%;
-            aspect-ratio: 16/9;
-            display: block;
-            background: #000;
-        }
-
-        .player-info {
-            padding: 10px 15px;
-            background: var(--card-bg);
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Forms & Inputs */
-        .input-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            background: var(--card-bg);
-            border: 1px solid #38383a;
-            border-radius: 10px;
-            padding: 12px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-        }
-
-        button {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 18px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        button:active {
-            opacity: 0.7;
-        }
-
-        /* List Status Messages */
-        #statusMsg {
-            font-size: 13px;
-            color: var(--text-sub);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        /* Channel List */
-        .channel-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .channel-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .channel-name {
-            font-size: 15px;
-            font-weight: 500;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-right: 10px;
-        }
-
-        .btn-play {
-            background: #30d158;
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 6px;
-        }
-
-        .btn-external {
-            background: #5e5ce6;
-            padding: 6px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-left: 5px;
-            text-decoration: none;
-            color: white;
-            display: inline-block;
-        }
-
-        .notice-box {
-            background: #2c2c2e;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-top: 20px;
-            line-height: 1.4;
-        }
-    </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>IPTV Brasil</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif}
+header{padding:14px;background:#10141c;position:sticky;top:0;z-index:10;border-bottom:1px solid #252b36}
+h1{font-size:20px;margin:0 0 10px}.row{display:flex;gap:7px;overflow:auto;padding-bottom:3px}
+button,select,input{border:1px solid #303746;background:#191e28;color:white;border-radius:9px;padding:10px;font-size:14px}
+button{white-space:nowrap}.active{background:#3a5cff!important;border-color:#5874ff}
+input{width:100%;margin-top:8px}
+#status{font-size:12px;color:#929aaa;margin-top:8px}
+main{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 116px)}
+aside{overflow:auto;border-right:1px solid #252b36}.item{display:flex;align-items:center;gap:9px;padding:9px;margin:3px 5px;border-radius:9px}.item:active,.item.sel{background:#202631}
+.logo{width:38px;height:38px;object-fit:contain;background:#141820;border-radius:6px;padding:3px;flex:none}
+.name{font-size:14px;font-weight:600}.meta{font-size:11px;color:#929aaa;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+section{padding:15px;overflow:auto}.screen{background:#000;border-radius:10px;min-height:230px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+video{width:100%;max-height:70vh;background:#000}.empty{text-align:center;color:#8d95a5;padding:60px 15px}
+h2{font-size:18px;margin:12px 0 4px}.hint{color:#929aaa;font-size:12px}
+@media(max-width:750px){main{display:block;height:auto}aside{height:43vh;border-right:0;border-bottom:1px solid #252b36}.screen{min-height:210px}section{padding:10px}}
+</style>
 </head>
 <body>
+<header>
+<h1>ðº IPTV Brasil</h1>
+<div class="row" id="lists"></div>
+<input id="search" placeholder="ð Pesquisar canal">
+<div id="status">Escolha uma lista...</div>
+</header>
+<main>
+<aside id="channels"></aside>
+<section>
+<div class="screen" id="screen"><div class="empty">Selecione um canal</div></div>
+<div id="info"></div>
+</section>
+</main>
+<script>
+const LISTS=[
+ ["ð§ð· Brasil","https://iptv-org.github.io/iptv/countries/br.m3u"],
+ ["ð§ð· ParanÃ¡","https://iptv-org.github.io/iptv/subdivisions/br-pr.m3u"],
+ ["ð AmÃ©rica","https://iptv-org.github.io/iptv/regions/amer.m3u"],
+ ["ð AmÃ©rica do Sul","https://iptv-org.github.io/iptv/regions/southam.m3u"],
+ ["ð Mundo","https://iptv-org.github.io/iptv/index.m3u"]
+];
+let channels=[],hls=null;
 
-    <header>
-        <h1>IPTV Player iOS</h1>
-    </header>
-
-    <div class="container">
-        <!-- Reprodução de Vídeo -->
-        <div class="player-wrapper">
-            <video id="videoPlayer" controls playsinline webkit-playsinline></video>
-            <div class="player-info">
-                <span id="currentChannel">Nenhum canal selecionado</span>
-            </div>
-        </div>
-
-        <!-- Carregador de Lista -->
-        <div class="input-group">
-            <input type="text" id="m3uUrl" placeholder="Cole o link da lista .m3u ou .m3u8">
-            <button onclick="loadPlaylist()">Carregar</button>
-        </div>
-
-        <div id="statusMsg">Insira uma URL válida para carregar os canais.</div>
-
-        <!-- Lista de Canais Renderizados -->
-        <div class="channel-list" id="channelContainer"></div>
-
-        <div class="notice-box">
-            <strong>Dica para iPhone:</strong> Se o canal não rodar no navegador devido a restrições HTTP/CORS do Safari, clique em <strong>"VLC"</strong> para abrir diretamente no aplicativo do VLC para iOS.
-        </div>
-    </div>
-
-    <script>
-        const video = document.getElementById('videoPlayer');
-        const channelContainer = document.getElementById('channelContainer');
-        const statusMsg = document.getElementById('statusMsg');
-        const currentChannelLabel = document.getElementById('currentChannel');
-        let hlsEngine = null;
-
-        // 1. Função para carregar e processar a lista M3U
-        async function loadPlaylist() {
-            const url = document.getElementById('m3uUrl').value.trim();
-            if (!url) {
-                alert('Por favor, informe a URL da lista.');
-                return;
-            }
-
-            statusMsg.innerText = "Carregando lista...";
-            channelContainer.innerHTML = "";
-
-            try {
-                let content = await fetchPlaylistContent(url);
-                parseAndRenderM3U(content);
-            } catch (err) {
-                console.warn("Tentativa direta falhou, tentando via CORS Proxy...", err);
-                try {
-                    // Fallback usando proxy CORS para contornar restrições do Safari
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                    let content = await fetchPlaylistContent(proxyUrl);
-                    parseAndRenderM3U(content);
-                } catch (proxyErr) {
-                    statusMsg.innerText = "Erro ao carregar lista. Verifique a URL ou o acesso CORS do servidor.";
-                    console.error("Erro final:", proxyErr);
-                }
-            }
-        }
-
-        async function fetchPlaylistContent(targetUrl) {
-            const response = await fetch(targetUrl);
-            if (!response.ok) throw new Error('Falha ao baixar arquivo');
-            return await response.text();
-        }
-
-        // 2. Parser simplificado de M3U
-        function parseAndRenderM3U(m3uText) {
-            const lines = m3uText.split('\n');
-            const channels = [];
-            let currentName = "";
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (line.startsWith('#EXTINF:')) {
-                    const nameParts = line.split(',');
-                    currentName = nameParts.length > 1 ? nameParts.slice(1).join(',') : "Canal Sem Nome";
-                } else if (line.length > 0 && !line.startsWith('#')) {
-                    if (currentName) {
-                        channels.push({ name: currentName, url: line });
-                        currentName = "";
-                    }
-                }
-            }
-
-            if (channels.length === 0) {
-                statusMsg.innerText = "Nenhum canal válido foi encontrado nesta lista.";
-                return;
-            }
-
-            statusMsg.innerText = `${channels.length} canais carregados com sucesso.`;
-            renderChannels(channels);
-        }
-
-        // 3. Renderiza a lista na tela
-        function renderChannels(channels) {
-            channelContainer.innerHTML = "";
-            
-            // Exibe até 100 canais para evitar sobrecarregar o Safari do iOS
-            const maxDisplay = Math.min(channels.length, 100);
-
-            for (let i = 0; i < maxDisplay; i++) {
-                const ch = channels[i];
-                const card = document.createElement('div');
-                card.className = 'channel-card';
-
-                const nameEl = document.createElement('div');
-                nameEl.className = 'channel-name';
-                nameEl.innerText = ch.name;
-
-                const actions = document.createElement('div');
-
-                const playBtn = document.createElement('button');
-                playBtn.className = 'btn-play';
-                playBtn.innerText = 'Assistir';
-                playBtn.onclick = () => playStream(ch.url, ch.name);
-
-                // Botão para abrir no app VLC caso o Safari bloqueie
-                const vlcBtn = document.createElement('a');
-                vlcBtn.className = 'btn-external';
-                vlcBtn.innerText = 'VLC';
-                vlcBtn.href = 'vlc://' + ch.url;
-
-                actions.appendChild(playBtn);
-                actions.appendChild(vlcBtn);
-
-                card.appendChild(nameEl);
-                card.appendChild(actions);
-
-                channelContainer.appendChild(card);
-            }
-        }
-
-        // 4. Mecanismo de reprodução compatível com iOS / Safari
-        function playStream(streamUrl, channelName) {
-            currentChannelLabel.innerText = channelName;
-
-            // Tratamento Nativo para iOS Safari
-            if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = streamUrl;
-                video.play().catch(e => {
-                    alert("Não foi possível reproduzir este canal no Safari. Tente abri-lo pelo botão VLC.");
-                });
-            } 
-            // Tratamento Fallback via HLS.js (outros navegadores ou iPads mais novos)
-            else if (Hls.isSupported()) {
-                if (hlsEngine) hlsEngine.destroy();
-                hlsEngine = new Hls();
-                hlsEngine.loadSource(streamUrl);
-                hlsEngine.attachMedia(video);
-                hlsEngine.on(Hls.Events.MANIFEST_PARSED, function () {
-                    video.play();
-                });
-            } else {
-                alert("Seu navegador não suporta a reprodução deste formato de vídeo.");
-            }
-        }
-    </script>
+const $=id=>document.getElementById(id);
+function esc(s){return String(s||'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
+function attr(s,k){let m=s.match(new RegExp(k+'="([^"]*)"','i'));return m?m[1]:''}
+function parse(t){
+ let a=[],m=null;
+ for(let l of t.replace(/^\uFEFF/,'').split(/\r?\n/)){
+  l=l.trim();if(!l)continue;
+  if(l.startsWith('#EXTINF')){
+   let comma=l.indexOf(',');
+   m={name:comma>=0?l.slice(comma+1).trim():'Canal',logo:attr(l,'tvg-logo'),group:attr(l,'group-title'),country:attr(l,'tvg-country')};
+  }else if(!l.startsWith('#')&&m){a.push({...m,url:l});m=null}
+ }
+ return a;
+}
+function render(){
+ let q=$('search').value.toLowerCase();
+ let a=channels.filter(c=>c.name.toLowerCase().includes(q));
+ $('channels').innerHTML='';
+ a.slice(0,2000).forEach(c=>{
+  let d=document.createElement('div');d.className='item';
+  d.innerHTML=(c.logo?`<img class="logo" src="${esc(c.logo)}" onerror="this.style.display='none'">`:'<div class="logo">ðº</div>')+
+  `<div style="min-width:0"><div class="name">${esc(c.name)}</div><div class="meta">${esc(c.group||c.country||'TV')}</div></div>`;
+  d.onclick=()=>play(c,d);$('channels').appendChild(d);
+ });
+ $('status').textContent=`${a.length.toLocaleString('pt-BR')} canais`;
+}
+async function load(url,btn){
+ document.querySelectorAll('#lists button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+ $('status').textContent='Carregando lista...';$('channels').innerHTML='<div class="empty">Aguarde...</div>';
+ try{
+  let r=await fetch(url,{cache:'no-store',mode:'cors'});
+  if(!r.ok)throw Error('HTTP '+r.status);
+  let t=await r.text();channels=parse(t);
+  if(!channels.length)throw Error('Nenhum canal encontrado');
+  render();
+ }catch(e){
+  $('status').textContent='NÃ£o foi possÃ­vel carregar esta lista.';
+  $('channels').innerHTML=`<div class="empty">Erro ao acessar a playlist.<br><br>Em iPhone, o site precisa estar hospedado em HTTPS. A playlist tambÃ©m precisa permitir acesso pelo navegador (CORS).</div>`;
+ }
+}
+function play(c,el){
+ document.querySelectorAll('.item').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');
+ if(hls){hls.destroy();hls=null}
+ $('screen').innerHTML='<video id="video" controls playsinline webkit-playsinline></video>';
+ let v=$('video'),url=c.url;
+ $('info').innerHTML=`<h2>${esc(c.name)}</h2><div class="hint">${esc(c.group||'')} ${c.country?'â¢ '+esc(c.country):''}</div>`;
+ if(/\.m3u8($|\?)/i.test(url)&&Hls.isSupported()){
+  hls=new Hls({lowLatencyMode:false});hls.loadSource(url);hls.attachMedia(v);
+  hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
+  hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)$('info').innerHTML+=`<div class="hint">â ï¸ Este canal nÃ£o aceita reproduÃ§Ã£o neste navegador.</div>`});
+ }else{
+  v.src=url;v.play().catch(()=>{$('info').innerHTML+=`<div class="hint">â ï¸ Toque no â¶ï¸. Se nÃ£o iniciar, o servidor do canal pode nÃ£o ser compatÃ­vel com iPhone.</div>`});
+ }
+}
+LISTS.forEach((x,i)=>{let b=document.createElement('button');b.textContent=x[0];b.onclick=()=>load(x[1],b);$('lists').appendChild(b);if(i===0)setTimeout(()=>load(x[1],b),50)});
+$('search').oninput=render;
+</script>
 </body>
 </html>
-
