@@ -1,97 +1,345 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IPTV Player - iOS Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --accent: #0a84ff;
+            --text-main: #ffffff;
+            --text-sub: #8e8e93;
+            --danger: #ff453a;
+        }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<title>IA Tradutor de Vídeos</title>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
 
-<style>
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 15px;
+            border-bottom: 0.5px solid #38383a;
+            text-align: center;
+        }
 
-body{
-font-family:Arial;
-background:#111;
-color:white;
-text-align:center;
-padding:20px;
-}
+        header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
 
-input{
-width:80%;
-padding:10px;
-margin:10px;
-font-size:16px;
-}
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-button{
-padding:10px 20px;
-font-size:16px;
-background:#28a745;
-border:none;
-color:white;
-border-radius:6px;
-}
+        /* Player Container */
+        .player-wrapper {
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
 
-iframe{
-width:90%;
-height:400px;
-margin-top:20px;
-}
+        video {
+            width: 100%;
+            aspect-ratio: 16/9;
+            display: block;
+            background: #000;
+        }
 
-#result{
-margin-top:20px;
-background:#222;
-padding:15px;
-border-radius:8px;
-}
+        .player-info {
+            padding: 10px 15px;
+            background: var(--card-bg);
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-</style>
+        /* Forms & Inputs */
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
 
+        input[type="text"] {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid #38383a;
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:active {
+            opacity: 0.7;
+        }
+
+        /* List Status Messages */
+        #statusMsg {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Channel List */
+        .channel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .channel-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .channel-name {
+            font-size: 15px;
+            font-weight: 500;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
+
+        .btn-play {
+            background: #30d158;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .btn-external {
+            background: #5e5ce6;
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-left: 5px;
+            text-decoration: none;
+            color: white;
+            display: inline-block;
+        }
+
+        .notice-box {
+            background: #2c2c2e;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+    </style>
 </head>
-
 <body>
 
-<h1>🎬 Tradutor de Vídeos com IA</h1>
+    <header>
+        <h1>IPTV Player iOS</h1>
+    </header>
 
-<input id="videoUrl" placeholder="Cole link do vídeo">
+    <div class="container">
+        <!-- Reprodução de Vídeo -->
+        <div class="player-wrapper">
+            <video id="videoPlayer" controls playsinline webkit-playsinline></video>
+            <div class="player-info">
+                <span id="currentChannel">Nenhum canal selecionado</span>
+            </div>
+        </div>
 
-<br>
+        <!-- Carregador de Lista -->
+        <div class="input-group">
+            <input type="text" id="m3uUrl" placeholder="Cole o link da lista .m3u ou .m3u8">
+            <button onclick="loadPlaylist()">Carregar</button>
+        </div>
 
-<button onclick="translateVideo()">Traduzir</button>
+        <div id="statusMsg">Insira uma URL válida para carregar os canais.</div>
 
-<div id="player"></div>
+        <!-- Lista de Canais Renderizados -->
+        <div class="channel-list" id="channelContainer"></div>
 
-<div id="result"></div>
+        <div class="notice-box">
+            <strong>Dica para iPhone:</strong> Se o canal não rodar no navegador devido a restrições HTTP/CORS do Safari, clique em <strong>"VLC"</strong> para abrir diretamente no aplicativo do VLC para iOS.
+        </div>
+    </div>
 
-<script>
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const channelContainer = document.getElementById('channelContainer');
+        const statusMsg = document.getElementById('statusMsg');
+        const currentChannelLabel = document.getElementById('currentChannel');
+        let hlsEngine = null;
 
-async function translateVideo(){
+        // 1. Função para carregar e processar a lista M3U
+        async function loadPlaylist() {
+            const url = document.getElementById('m3uUrl').value.trim();
+            if (!url) {
+                alert('Por favor, informe a URL da lista.');
+                return;
+            }
 
-let url=document.getElementById("videoUrl").value
+            statusMsg.innerText = "Carregando lista...";
+            channelContainer.innerHTML = "";
 
-let id=url.split("v=")[1]
+            try {
+                let content = await fetchPlaylistContent(url);
+                parseAndRenderM3U(content);
+            } catch (err) {
+                console.warn("Tentativa direta falhou, tentando via CORS Proxy...", err);
+                try {
+                    // Fallback usando proxy CORS para contornar restrições do Safari
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    let content = await fetchPlaylistContent(proxyUrl);
+                    parseAndRenderM3U(content);
+                } catch (proxyErr) {
+                    statusMsg.innerText = "Erro ao carregar lista. Verifique a URL ou o acesso CORS do servidor.";
+                    console.error("Erro final:", proxyErr);
+                }
+            }
+        }
 
-document.getElementById("player").innerHTML=
-`<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`
+        async function fetchPlaylistContent(targetUrl) {
+            const response = await fetch(targetUrl);
+            if (!response.ok) throw new Error('Falha ao baixar arquivo');
+            return await response.text();
+        }
 
-document.getElementById("result").innerHTML="Processando vídeo..."
+        // 2. Parser simplificado de M3U
+        function parseAndRenderM3U(m3uText) {
+            const lines = m3uText.split('\n');
+            const channels = [];
+            let currentName = "";
 
-let r=await fetch("/translate",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({url:url})
-})
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line.startsWith('#EXTINF:')) {
+                    const nameParts = line.split(',');
+                    currentName = nameParts.length > 1 ? nameParts.slice(1).join(',') : "Canal Sem Nome";
+                } else if (line.length > 0 && !line.startsWith('#')) {
+                    if (currentName) {
+                        channels.push({ name: currentName, url: line });
+                        currentName = "";
+                    }
+                }
+            }
 
-let data=await r.json()
+            if (channels.length === 0) {
+                statusMsg.innerText = "Nenhum canal válido foi encontrado nesta lista.";
+                return;
+            }
 
-document.getElementById("result").innerHTML=data.text
+            statusMsg.innerText = `${channels.length} canais carregados com sucesso.`;
+            renderChannels(channels);
+        }
 
-}
+        // 3. Renderiza a lista na tela
+        function renderChannels(channels) {
+            channelContainer.innerHTML = "";
+            
+            // Exibe até 100 canais para evitar sobrecarregar o Safari do iOS
+            const maxDisplay = Math.min(channels.length, 100);
 
-</script>
+            for (let i = 0; i < maxDisplay; i++) {
+                const ch = channels[i];
+                const card = document.createElement('div');
+                card.className = 'channel-card';
 
+                const nameEl = document.createElement('div');
+                nameEl.className = 'channel-name';
+                nameEl.innerText = ch.name;
+
+                const actions = document.createElement('div');
+
+                const playBtn = document.createElement('button');
+                playBtn.className = 'btn-play';
+                playBtn.innerText = 'Assistir';
+                playBtn.onclick = () => playStream(ch.url, ch.name);
+
+                // Botão para abrir no app VLC caso o Safari bloqueie
+                const vlcBtn = document.createElement('a');
+                vlcBtn.className = 'btn-external';
+                vlcBtn.innerText = 'VLC';
+                vlcBtn.href = 'vlc://' + ch.url;
+
+                actions.appendChild(playBtn);
+                actions.appendChild(vlcBtn);
+
+                card.appendChild(nameEl);
+                card.appendChild(actions);
+
+                channelContainer.appendChild(card);
+            }
+        }
+
+        // 4. Mecanismo de reprodução compatível com iOS / Safari
+        function playStream(streamUrl, channelName) {
+            currentChannelLabel.innerText = channelName;
+
+            // Tratamento Nativo para iOS Safari
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.play().catch(e => {
+                    alert("Não foi possível reproduzir este canal no Safari. Tente abri-lo pelo botão VLC.");
+                });
+            } 
+            // Tratamento Fallback via HLS.js (outros navegadores ou iPads mais novos)
+            else if (Hls.isSupported()) {
+                if (hlsEngine) hlsEngine.destroy();
+                hlsEngine = new Hls();
+                hlsEngine.loadSource(streamUrl);
+                hlsEngine.attachMedia(video);
+                hlsEngine.on(Hls.Events.MANIFEST_PARSED, function () {
+                    video.play();
+                });
+            } else {
+                alert("Seu navegador não suporta a reprodução deste formato de vídeo.");
+            }
+        }
+    </script>
 </body>
 </html>
+
